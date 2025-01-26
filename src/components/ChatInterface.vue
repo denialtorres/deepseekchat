@@ -31,6 +31,8 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 import { marked } from 'marked'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github-dark.css'
 
 const messages = ref([])
 const userInput = ref('')
@@ -39,11 +41,24 @@ const isThinking = ref(false)
 const messageVisibility = ref({})
 
 const formatMessage = (content) => {
-  return marked(content, { breaks: true, gfm: true })
+  return marked(content, {
+    breaks: true,
+    gfm: true,
+    highlight: (code, lang) => {
+      const validLanguage = hljs.getLanguage(lang) ? lang : 'plaintext'
+      return hljs.highlight(code, { language: validLanguage }).value
+    },
+  })
 }
-
 const toggleThought = (index) => {
   messageVisibility.value[index] = !messageVisibility.value[index]
+}
+
+const highlightCode = () => {
+  const blocks = document.querySelectorAll('pre code')
+  blocks.forEach((block) => {
+    hljs.highlightBlock(block)
+  })
 }
 
 const sendMessage = async () => {
@@ -113,6 +128,7 @@ const sendMessage = async () => {
 
     // Scroll to bottom
     await nextTick()
+    highlightCode()
     messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
   } catch (error) {
     console.error('Error:', error)
