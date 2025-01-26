@@ -10,7 +10,7 @@
           </div>
           <p v-show="messageVisibility[index]"><i>Thinking: </i>{{ message.content }}</p>
         </template>
-        <p v-else>{{ message.content }}</p>
+        <div v-else v-html="formatMessage(message.content)"></div>
       </div>
       <div v-if="isThinking" class="message thinking">
         <p>🤔🤔🤔..</p>
@@ -30,12 +30,17 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
+import { marked } from 'marked'
 
 const messages = ref([])
 const userInput = ref('')
 const messagesContainer = ref(null)
 const isThinking = ref(false)
 const messageVisibility = ref({})
+
+const formatMessage = (content) => {
+  return marked(content, { breaks: true, gfm: true })
+}
 
 const toggleThought = (index) => {
   messageVisibility.value[index] = !messageVisibility.value[index]
